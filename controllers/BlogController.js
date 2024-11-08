@@ -8,14 +8,19 @@ const { BadRequestError, ConflictError } = require("../utils/customError");
 
 
 const getDashBoard = asyncHandler(async (req, res) => {
+  const selected = req.query.interest || '';
   const interests = req?.user?.interests ;
   let filter = {};
-  if (interests?.length > 0) {
-    filter = { category: { $in: interests } }; // Filter by interests if not empty
+  console.log(selected, "knkjjkn")
+  if(selected){
+  
+    filter = { category: selected }
+  } else if(interests?.length > 0) {
+    filter = { category: { $in: interests } };
   }
 
   const blogs = await Blog.find(filter).populate('author').sort({ createdAt: -1 });;
-  createSuccessResponse(200, { blogs }, "successfully fetch dashboard data", res, req);
+  createSuccessResponse(200, { blogs, interests }, "successfully fetch dashboard data", res, req);
 });
 
 
