@@ -1,23 +1,36 @@
+import { Router } from 'express';
+import {
+  getDashBoard,
+  createBlog,
+  getMyBlogs,
+  getBlogDetail,
+  editBlog,
+  deleteBlog
+} from '../controllers/blog.controller';
+import {
+  createUser,
+  loginUser,
+  otpVerification,
+  resendOtpCode,
+  logoutUser,
+  getProfile,
+  editProfile,
+  passWordChangeProfile,
+  emailChangeProfile,
+  verifyOTP
+} from '../controllers/auth.controller';
+import {
+  validateSignup,
+  validateLogin,
+  validateBlogForm,
+  validateProfile,
+  validatePassword
+} from '../middlewares/validateForm.middleware';
+import { authMiddleware, isUser } from '../middlewares/auth.middleware';
+import resendOtpLimiter from '../middlewares/rateLimit.middleware';
+import upload from '../config/multer.config';
 
-
-const Router = require('express');
-const { getDashBoard, createBlog,
-    getMyBlogs, getBlogDetail,
-    editBlog, deleteBlog
- } = require('../controllers/BlogController');
-const { authMiddleware, isUser } = require('../middlewares/authMiddleware');
-const { createUser, loginUser, 
-       otpVerification, resendOtpCode,
-       logoutUser, getProfile,
-       editProfile, passWordChangeProfile,
-       emailChangeProfile, verifyOTP
-    } = require('../controllers/authController');
-const { validateSignup, validateLogin, validateBlogForm, validateProfile, validatePassword } = require("../middlewares/validateForm")
-const resendOtpLimiter = require('../middlewares/rateLimit');
-const upload = require('../config/multer');
 const router = Router();
-
-
 
 // Public routes (no authentication required)
 router.post('/login', validateLogin, loginUser);
@@ -27,7 +40,6 @@ router.post('/resend-otp', resendOtpLimiter, resendOtpCode);
 
 // Authenticated routes (all routes here require authMiddleware and isUser)
 router.use(authMiddleware, isUser);
-
 
 router.get('/dashboard', getDashBoard);
 router.get('/myblogs', getMyBlogs); // Get user's Blogs
@@ -41,7 +53,6 @@ router.route('/blog')
 router.route('/blog/:blogId')
   .get(getBlogDetail) // Get Blog details
   .delete(deleteBlog); // Delete Blog
-
 
 // Profile routes
 router.route('/profile')
@@ -60,7 +71,4 @@ router.route('/profile/verify-otp')
 // Logout route
 router.post('/logout', logoutUser);
 
-
-module.exports = router;
-
-
+export default router;
