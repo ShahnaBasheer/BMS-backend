@@ -25,7 +25,6 @@ lib-cov/
 .env
 
 # Optional: production build output
-dist/
 out/
 coverage/
 
