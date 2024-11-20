@@ -21,9 +21,11 @@ const customError_utils_1 = require("../utils/customError.utils");
 const blog_service_2 = __importDefault(require("../services/blog.service"));
 const getDashBoard = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
+    const page = parseInt(req.query.page, 10);
+    const limit = parseInt(req.query.size, 10);
     const selected = req.query.interest || '';
     const interests = (_b = (_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.interests) !== null && _b !== void 0 ? _b : [];
-    const blogs = yield blog_service_1.default.getDashboard(selected, interests);
+    const blogs = yield blog_service_1.default.getDashboard(selected, interests, page, limit);
     (0, responseFormatter_config_1.default)(200, { blogs, interests }, 'Successfully fetched dashboard data', res, req);
 }));
 exports.getDashBoard = getDashBoard;
@@ -46,9 +48,12 @@ const createBlog = (0, express_async_handler_1.default)((req, res) => __awaiter(
 }));
 exports.createBlog = createBlog;
 const getMyBlogs = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const blogs = yield blog_service_1.default.getMyBlogs((_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.id);
-    (0, responseFormatter_config_1.default)(200, { blogs }, 'Blogs retrieved successfully', res, req);
+    var _a, _b;
+    const page = parseInt(req.query.page, 10);
+    const limit = parseInt(req.query.size, 10);
+    const selected = ((_a = req.query) === null || _a === void 0 ? void 0 : _a.category) || '';
+    const data = yield blog_service_1.default.getMyBlogs((_b = req === null || req === void 0 ? void 0 : req.user) === null || _b === void 0 ? void 0 : _b.id, page, limit, selected);
+    (0, responseFormatter_config_1.default)(200, { blogs: data.blogs, categories: data.categories }, 'Blogs retrieved successfully', res, req);
 }));
 exports.getMyBlogs = getMyBlogs;
 const getBlogDetail = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -83,91 +88,3 @@ const editBlog = (0, express_async_handler_1.default)((req, res) => __awaiter(vo
     (0, responseFormatter_config_1.default)(200, { blog }, "Blog updated successfully", res, req);
 }));
 exports.editBlog = editBlog;
-// import { Response } from 'express';
-// import asyncHandler from 'express-async-handler';
-// import createSuccessResponse from '../utils/responseFormatter.config';
-// import { CloudinaryfileStore } from '../utils/helperFunctions.utils';
-// import { validationResult } from 'express-validator';
-// import Blog from '../models/blog.model';
-// import { BadRequestError, ConflictError } from '../utils/customError.utils';
-// import CustomRequest from '../interfaces/request.interface';
-// const getDashBoard = asyncHandler(async (req:  CustomRequest, res: Response):Promise<void> => {
-//   const selected: string = (req.query.interest as string) || '';
-//   const interests: string[] = req?.user?.interests ?? [];
-//   let filter = {};
-//   console.log(selected, 'knkjjkn');
-//   if (selected) {
-//     filter = { category: selected };
-//   } else if (interests?.length > 0) {
-//     filter = { category: { $in: interests } };
-//   }
-//   const blogs = await Blog.find(filter).populate('author').sort({ createdAt: -1 });
-//   createSuccessResponse(200, { blogs, interests }, 'successfully fetch dashboard data', res, req);
-// });
-// const createBlog = asyncHandler(async (req:  CustomRequest, res: Response): Promise<void> => {
-//   const errors = validationResult(req);
-//   // Validate incoming  CustomRequest data
-//   if (!errors.isEmpty()) {
-//     console.log(errors.array());
-//     throw new BadRequestError('Validation failed');
-//   }
-//   // Assert req.files as a type that includes an 'image' key
-//   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-//   // Ensure an image file is uploaded
-//   if (!files?.image || files.image.length === 0) {
-//     throw new ConflictError('Image is required');
-//   }
-//   // Upload the image to Cloudinary (or relevant storage)
-//   const coverPicPath = await CloudinaryfileStore(files.image, '/Blogs/CoverPics', 'AR_coverpic');
-//   if (!coverPicPath || coverPicPath.length === 0) {
-//     throw new Error('Image upload failed');
-//   }
-//   // Prepare Blog data to be saved
-//   const data = {
-//     title: req.body.title,
-//     content: req.body.content,
-//     category: req.body.category,
-//     description: req.body.description,
-//     author: req.user.id, // assuming req.user.id is set by an authentication middleware
-//     image: coverPicPath[0], // store the first URL/path from the array
-//   };
-//   // Save Blog to database
-//   const blog = await Blog.create(data);
-//   createSuccessResponse(200, { blog }, 'Blog created successfully', res, req);
-// });
-// const getMyBlogs = asyncHandler(async (req:  CustomRequest, res: Response):Promise<void> => {
-//   const blogs = await Blog.find({ author: req?.user?.id }).sort({ createdAt: -1 });
-//   createSuccessResponse(200, { blogs }, 'Blogs retrieved successfully', res, req);
-// });
-// const getBlogDetail = asyncHandler(async (req:  CustomRequest, res: Response):Promise<void> => {
-//   const { blogId } = req.params;
-//   const blog = await Blog.findById(blogId).populate('author');
-//   createSuccessResponse(200, { blog }, 'Blog retrieved successfully', res, req);
-// });
-// const editBlog = asyncHandler(async (req:  CustomRequest, res: Response):Promise<void> => {
-//   const errors = validationResult(req);
-//   let coverPicPath: string[] | null = null;
-//   // Validate incoming  CustomRequest data
-//   if (!errors.isEmpty()) {
-//     console.log(errors.array());
-//     throw new BadRequestError('Validation failed');
-//   }
-//   // Additional code for editing the blog can be placed here...
-// });
-// const deleteBlog = asyncHandler(async (req:  CustomRequest, res: Response):Promise<void> => {
-//   const { blogId } = req.params;
-//   const getBlog = await Blog.findById(blogId);
-//   if (!getBlog) {
-//     throw new Error("Blog not found"); 
-//   }
-//   const blog = await Blog.findByIdAndDelete(blogId);
-//   createSuccessResponse(200,{ blog }, "Blog successfully deleted", res, req);
-// });
-// export {
-//   getDashBoard,
-//   createBlog,
-//   getMyBlogs,
-//   getBlogDetail,
-//   editBlog,
-//   deleteBlog
-// }

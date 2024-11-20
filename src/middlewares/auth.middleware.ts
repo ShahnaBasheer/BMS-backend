@@ -5,6 +5,7 @@ import User from '../models/user.model';
 import { ForbiddenError, UnauthorizedError } from '../utils/customError.utils';
 import { generateToken } from '../config/jwToken.config';
 import CustomRequest from '../interfaces/request.interface';
+import { Constants } from '../utils/variables';
 
 
 
@@ -12,7 +13,7 @@ export const authMiddleware = asyncHandler(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       const authorizationHeader = req.headers?.authorization;
-      if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+      if (!authorizationHeader || !authorizationHeader.startsWith(Constants.Bearer)) {
         throw new UnauthorizedError('Not authorized: no Bearer');
       }
 
@@ -29,8 +30,8 @@ export const authMiddleware = asyncHandler(
       if (user.isBlocked) {
         res.clearCookie(process.env.USER_REFRESH!, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+          secure: process.env.NODE_ENV === Constants.Production,
+          sameSite: process.env.NODE_ENV === Constants.Production ? Constants.None : Constants.Lax,
         });
         throw new ForbiddenError('User account is blocked');
       }
@@ -59,19 +60,21 @@ export const authMiddleware = asyncHandler(
           console.log('New token has been generated and stored');
           req.user = user;
           req.token = token;
-        } catch (refreshError: any) {
+        } catch (error: any) {
           res.clearCookie(process.env.USER_REFRESH!, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            secure: process.env.NODE_ENV === Constants.Production,
+            sameSite: Constants.Production ? Constants.None : Constants.Lax,
           });
           if (
-            refreshError instanceof ForbiddenError ||
-            refreshError instanceof UnauthorizedError
+            error instanceof ForbiddenError ||
+            error instanceof UnauthorizedError
           ) {
-            throw refreshError;
+            next(error); 
+          } else {
+            next(new Error('Internal Server Error')); 
           }
-          console.log(refreshError?.message, 'session expired');
+          console.log(error?.message, 'session expired');
         }
       } else if (error instanceof ForbiddenError) {
         throw error;
@@ -87,6 +90,7 @@ export const isUser = asyncHandler(
     if (req?.user) {
       return next();
     }
-    throw new UnauthorizedError('Authorization Failed!');
+    console.log('Authorization Failed');
+    throw new UnauthorizedError('Login again!');
   }
 );

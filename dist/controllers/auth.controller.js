@@ -18,6 +18,7 @@ const express_async_handler_1 = __importDefault(require("express-async-handler")
 const express_validator_1 = require("express-validator");
 const customError_utils_1 = require("../utils/customError.utils");
 const responseFormatter_config_1 = __importDefault(require("../utils/responseFormatter.config"));
+const variables_1 = require("../utils/variables");
 // Create new user from signup form
 const createUser = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = (0, express_validator_1.validationResult)(req);
@@ -69,8 +70,8 @@ const loginUser = (0, express_async_handler_1.default)((req, res) => __awaiter(v
     const { token, user, refresh } = yield user_service_1.default.loginUser(email, password);
     res.cookie((_a = process.env.USER_REFRESH) !== null && _a !== void 0 ? _a : '', refresh, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NODE_ENV === variables_1.Constants.Production,
+        sameSite: process.env.NODE_ENV === variables_1.Constants.Production ? variables_1.Constants.None : variables_1.Constants.Lax,
         maxAge: 3 * 24 * 60 * 60 * 1000,
     });
     (0, responseFormatter_config_1.default)(200, { token, user }, "Login successfully!", res);
@@ -83,8 +84,8 @@ const logoutUser = (0, express_async_handler_1.default)((req, res) => __awaiter(
         throw new customError_utils_1.UnauthorizedError("No Refresh Token in Cookies");
     res.clearCookie(process.env.USER_REFRESH, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NODE_ENV === variables_1.Constants.Production,
+        sameSite: process.env.NODE_ENV === variables_1.Constants.Production ? variables_1.Constants.None : variables_1.Constants.Lax,
     });
     (0, responseFormatter_config_1.default)(200, null, "Successfully logged out!", res);
 }));

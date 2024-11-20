@@ -33,8 +33,8 @@ class BlogService {
             return this._blogRepository.create(data);
         });
     }
-    getDashboard(selected, interests) {
-        return __awaiter(this, void 0, void 0, function* () {
+    getDashboard(selected_1, interests_1, page_1) {
+        return __awaiter(this, arguments, void 0, function* (selected, interests, page, size = 1) {
             let filter = {};
             if (selected) {
                 filter = { category: selected };
@@ -42,23 +42,30 @@ class BlogService {
             else if ((interests === null || interests === void 0 ? void 0 : interests.length) > 0) {
                 filter = { category: { $in: interests } };
             }
-            console.log(filter, "knkjjkn");
-            return this._blogRepository.find(filter, { createdAt: -1 });
+            const skip = (page - 1) * size;
+            return (yield this._blogRepository.find(filter, { createdAt: -1 }, skip, size));
         });
     }
-    getMyBlogs(authorId) {
+    getMyBlogs(authorId, page, size, selected) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this._blogRepository.find({ author: authorId }, { createdAt: -1 });
+            const skip = (page - 1) * size;
+            let filter = { author: authorId };
+            if (selected) {
+                filter.category = selected;
+            }
+            const blogs = yield this._blogRepository.find(filter, { createdAt: -1 }, skip, size);
+            const categories = yield this._blogRepository.getDistinctValues({ author: authorId }, 'category');
+            return { blogs, categories };
         });
     }
     getBlogDetail(blogId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this._blogRepository.findById(blogId);
+            return yield this._blogRepository.findById(blogId);
         });
     }
     deleteBlog(blogId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this._blogRepository.deleteById(blogId);
+            return yield this._blogRepository.deleteById(blogId);
         });
     }
     editBlog(data, imageFile, blogId) {

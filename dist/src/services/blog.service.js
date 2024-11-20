@@ -42,7 +42,6 @@ class BlogService {
             else if ((interests === null || interests === void 0 ? void 0 : interests.length) > 0) {
                 filter = { category: { $in: interests } };
             }
-            console.log(filter, "knkjjkn");
             return this._blogRepository.find(filter, { createdAt: -1 });
         });
     }

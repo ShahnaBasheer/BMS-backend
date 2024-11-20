@@ -8,7 +8,10 @@ class BlogRepository extends BaseRepository<IBlogDocument> {
     super(Blog);
   }
 
-  // Add any blog-specific methods here, if needed
+  async getDistinctValues(filter: object, type: string): Promise<string[]>{
+      return await this.model.find(filter).distinct(type); 
+  }
+
 }
 
 export default BlogRepository;

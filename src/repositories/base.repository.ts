@@ -11,22 +11,22 @@ export default class BaseRepository<T extends Document> {
   }
 
   async create(data: Partial<T>): Promise<T> {
-    return this.model.create(data);
+    return await this.model.create(data);
   }
 
   async findById(id: string): Promise<T | null> {
-    return this.model.findById(id).populate('author').exec();
+    return await this.model.findById(id).populate('author').exec();
   }
 
-  async find(filter: object, sortOptions = {}): Promise<T[]> {
-    return this.model.find(filter).populate('author').sort(sortOptions).exec();
+  async find(filter: object, sortOptions = {}, skip: number = 0, limit: number = 10): Promise<T[]> {
+    return await this.model.find(filter).populate('author').sort(sortOptions).skip(skip).limit(limit).exec();
   }
 
   async updateById(id: string, data: Partial<T>): Promise<T | null> {
-    return this.model.findByIdAndUpdate(id, data, { new: true }).populate('author').exec();
+    return await this.model.findByIdAndUpdate(id, data, { new: true }).populate('author').exec();
   }
 
   async deleteById(id: string): Promise<T | null> {
-    return this.model.findByIdAndDelete(id).exec();
+    return await this.model.findByIdAndDelete(id).exec();
   }
 }

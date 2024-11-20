@@ -15,27 +15,27 @@ class BaseRepository {
     }
     create(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.model.create(data);
+            return yield this.model.create(data);
         });
     }
     findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.model.findById(id).populate('author').exec();
+            return yield this.model.findById(id).populate('author').exec();
         });
     }
     find(filter_1) {
-        return __awaiter(this, arguments, void 0, function* (filter, sortOptions = {}) {
-            return this.model.find(filter).populate('author').sort(sortOptions).exec();
+        return __awaiter(this, arguments, void 0, function* (filter, sortOptions = {}, skip = 0, limit = 10) {
+            return yield this.model.find(filter).populate('author').sort(sortOptions).skip(skip).limit(limit).exec();
         });
     }
     updateById(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.model.findByIdAndUpdate(id, data, { new: true }).populate('author').exec();
+            return yield this.model.findByIdAndUpdate(id, data, { new: true }).populate('author').exec();
         });
     }
     deleteById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.model.findByIdAndDelete(id).exec();
+            return yield this.model.findByIdAndDelete(id).exec();
         });
     }
 }

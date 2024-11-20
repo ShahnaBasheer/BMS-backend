@@ -3,13 +3,13 @@ import { Response } from "express";
 import asyncHandler from "express-async-handler";
 import { validationResult } from "express-validator";
 import {
-  NotFoundError,
   BadRequestError,
   UnauthorizedError,
 } from "../utils/customError.utils";
 import createSuccessResponse from "../utils/responseFormatter.config";
 import CustomRequest from "../interfaces/request.interface";
 import { UserData } from "../interfaces/user.interface";
+import { Constants } from "../utils/variables";
 
 
 // Create new user from signup form
@@ -69,8 +69,8 @@ const loginUser = asyncHandler(async (req: CustomRequest, res: Response): Promis
   const { token, user, refresh } = await UserService.loginUser(email, password);
   res.cookie(process.env.USER_REFRESH ?? '', refresh, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === Constants.Production,
+    sameSite: process.env.NODE_ENV === Constants.Production ? Constants.None : Constants.Lax,
     maxAge: 3 * 24 * 60 * 60 * 1000,
   });
 
@@ -84,8 +84,8 @@ const logoutUser = asyncHandler(async (req: CustomRequest, res: Response): Promi
 
   res.clearCookie(process.env.USER_REFRESH as string, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === Constants.Production,
+    sameSite: process.env.NODE_ENV === Constants.Production ? Constants.None : Constants.Lax,
   });
 
   createSuccessResponse(200, null, "Successfully logged out!", res);

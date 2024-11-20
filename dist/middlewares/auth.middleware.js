@@ -41,11 +41,12 @@ const jsonwebtoken_1 = __importStar(require("jsonwebtoken"));
 const user_model_1 = __importDefault(require("../models/user.model"));
 const customError_utils_1 = require("../utils/customError.utils");
 const jwToken_config_1 = require("../config/jwToken.config");
+const variables_1 = require("../utils/variables");
 exports.authMiddleware = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const authorizationHeader = (_a = req.headers) === null || _a === void 0 ? void 0 : _a.authorization;
-        if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+        if (!authorizationHeader || !authorizationHeader.startsWith(variables_1.Constants.Bearer)) {
             throw new customError_utils_1.UnauthorizedError('Not authorized: no Bearer');
         }
         const accessToken = authorizationHeader.split(' ')[1];
@@ -59,8 +60,8 @@ exports.authMiddleware = (0, express_async_handler_1.default)((req, res, next) =
         if (user.isBlocked) {
             res.clearCookie(process.env.USER_REFRESH, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                secure: process.env.NODE_ENV === variables_1.Constants.Production,
+                sameSite: process.env.NODE_ENV === variables_1.Constants.Production ? variables_1.Constants.None : variables_1.Constants.Lax,
             });
             throw new customError_utils_1.ForbiddenError('User account is blocked');
         }
@@ -87,17 +88,20 @@ exports.authMiddleware = (0, express_async_handler_1.default)((req, res, next) =
                 req.user = user;
                 req.token = token;
             }
-            catch (refreshError) {
+            catch (error) {
                 res.clearCookie(process.env.USER_REFRESH, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                    secure: process.env.NODE_ENV === variables_1.Constants.Production,
+                    sameSite: variables_1.Constants.Production ? variables_1.Constants.None : variables_1.Constants.Lax,
                 });
-                if (refreshError instanceof customError_utils_1.ForbiddenError ||
-                    refreshError instanceof customError_utils_1.UnauthorizedError) {
-                    throw refreshError;
+                if (error instanceof customError_utils_1.ForbiddenError ||
+                    error instanceof customError_utils_1.UnauthorizedError) {
+                    next(error);
                 }
-                console.log(refreshError === null || refreshError === void 0 ? void 0 : refreshError.message, 'session expired');
+                else {
+                    next(new Error('Internal Server Error'));
+                }
+                console.log(error === null || error === void 0 ? void 0 : error.message, 'session expired');
             }
         }
         else if (error instanceof customError_utils_1.ForbiddenError) {
@@ -110,5 +114,6 @@ exports.isUser = (0, express_async_handler_1.default)((req, res, next) => __awai
     if (req === null || req === void 0 ? void 0 : req.user) {
         return next();
     }
-    throw new customError_utils_1.UnauthorizedError('Authorization Failed!');
+    console.log('Authorization Failed');
+    throw new customError_utils_1.UnauthorizedError('Login again!');
 }));
