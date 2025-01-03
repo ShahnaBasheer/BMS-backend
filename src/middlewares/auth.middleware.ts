@@ -45,9 +45,9 @@ export const authMiddleware = asyncHandler(
 
         try {
           if (!refreshToken) {
-            throw new UnauthorizedError('Refreshtoken is not found!');
+            throw new UnauthorizedError('Session Expired! Login Again.');
           }
-          
+
           const decode = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as JwtPayload;
           const user = await User.findById(decode?.id);
   
