@@ -1,9 +1,10 @@
+import { IUserRepository } from './../interfaces/userRepository.interface';
 // repositories/user.repository.ts
 import { IUserDocument } from "../interfaces/user.interface";
 import User from "../models/user.model";
 import BaseRepository from "./base.repository";
 
-class UserRepository extends BaseRepository<IUserDocument> {
+class UserRepository extends BaseRepository<IUserDocument> implements IUserRepository{
   constructor() {
       super(User);
   }

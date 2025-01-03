@@ -43,18 +43,16 @@ export const authMiddleware = asyncHandler(
       if (error instanceof TokenExpiredError) {
         const refreshToken = req?.cookies[process.env.USER_REFRESH!];
 
-        if (!refreshToken) {
-          throw new UnauthorizedError('Refresh token is not found!');
-        }
-
         try {
+          if (!refreshToken) {
+            throw new UnauthorizedError('Refreshtoken is not found!');
+          }
+          
           const decode = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as JwtPayload;
           const user = await User.findById(decode?.id);
+  
           if (!user) throw new UnauthorizedError('User not found!');
-
-          if (user.isBlocked) {
-            throw new ForbiddenError('User account is blocked');
-          }
+          if (user.isBlocked) throw new ForbiddenError('User account is blocked');
 
           const token = generateToken(user?.id);
           console.log('New token has been generated and stored');
@@ -66,10 +64,7 @@ export const authMiddleware = asyncHandler(
             secure: process.env.NODE_ENV === Constants.Production,
             sameSite: Constants.Production ? Constants.None : Constants.Lax,
           });
-          if (
-            error instanceof ForbiddenError ||
-            error instanceof UnauthorizedError
-          ) {
+          if (error instanceof ForbiddenError || error instanceof UnauthorizedError) {
             next(error); 
           } else {
             next(new Error('Internal Server Error')); 
@@ -77,9 +72,8 @@ export const authMiddleware = asyncHandler(
           console.log(error?.message, 'session expired');
         }
       } else if (error instanceof ForbiddenError) {
-        throw error;
+        return next(error);
       }
-
       return next();
     }
   }

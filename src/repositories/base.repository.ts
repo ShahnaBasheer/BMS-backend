@@ -1,9 +1,10 @@
 // repositories/base.repository.ts
+import { IBaseRepository } from '../interfaces/baseRepository.interface';
 import { Model, Document } from 'mongoose';
 
 
 
-export default class BaseRepository<T extends Document> {
+export default class BaseRepository<T extends Document> implements IBaseRepository<T>{
   protected model: Model<T>;
 
   constructor(model: Model<T>) {

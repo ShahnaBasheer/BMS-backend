@@ -1,14 +1,15 @@
 // src/repositories/IUserRepository.ts
 
+import { IBaseRepository } from "./baseRepository.interface";
 import { IUserDocument } from "./user.interface";
 
-
-interface IUserRepository {
-  findByEmail(email: string): Promise<IUserDocument | null>;
-  create(userData: Partial<IUserDocument>): Promise<IUserDocument>;
-  updateById(id: string, updateData: Partial<IUserDocument>): Promise<IUserDocument | null>;
-  findOneAndUpdate(filter: object, updateData: object): Promise<IUserDocument | null>;
-  deleteByEmail(email: string): Promise<void>;
+export interface IUserRepository extends IBaseRepository<IUserDocument> {
+  findVerifiedUserByEmail(email: string): Promise<IUserDocument | null>;
+  findUserByEmail(email: string): Promise<IUserDocument | null>;
+  isUserBlocked(id: string): Promise<boolean>;
+  updateProfile(userId: string, updateData: Partial<IUserDocument>): Promise<IUserDocument | null>;
+  updateEmail(userId: string, newEmail: string): Promise<IUserDocument | null>;
+  verifyUser(userId: string): Promise<IUserDocument | null>;
+  blockUser(userId: string): Promise<IUserDocument | null>;
+  unblockUser(userId: string): Promise<IUserDocument | null>;
 }
-
-export default IUserRepository;
